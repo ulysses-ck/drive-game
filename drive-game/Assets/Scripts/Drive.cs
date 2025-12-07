@@ -1,4 +1,3 @@
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -8,6 +7,7 @@ public class Drive : MonoBehaviour
     [SerializeField] public GameObject[] wheels;
     public float torque = 200f;
     public float maxSteerAngle = 30;
+    public float steerSmoothSpeed = 10f;
 
     private float currentAccelerationInput = 0f;
     private float currentSteer = 0f;
@@ -24,16 +24,25 @@ public class Drive : MonoBehaviour
 
     void Go(float accel, float steer)
     {
+        float targetSteerAngle = steer * maxSteerAngle;
+
         accel = Mathf.Clamp(accel, -1f, 1f);
-        steer = Mathf.Clamp(steer, -1f, 1f) * maxSteerAngle;
 
         float thrustTorque = accel * torque;
         for(int i = 0; i < wheels.Length; i++)
         {
+            float currentSteerAngle = WCs[i].steerAngle;
+            float smoothedSteer = Mathf.Lerp(
+                currentSteerAngle,
+                targetSteerAngle,
+                Time.fixedDeltaTime * steerSmoothSpeed
+                );
+
+
             WCs[i].motorTorque = thrustTorque;
 
             if (i<2)
-                WCs[i].steerAngle = steer;
+                WCs[i].steerAngle = smoothedSteer;
 
             Quaternion quat;
             Vector3 position;

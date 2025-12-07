@@ -1288,6 +1288,7 @@ MonoBehaviour:
   - {fileID: 430477757}
   torque: 200
   maxSteerAngle: 30
+  steerSmoothSpeed: 30
 --- !u!114 &1398967577
 MonoBehaviour:
   m_ObjectHideFlags: 0
