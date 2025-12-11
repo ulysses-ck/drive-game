@@ -8,9 +8,11 @@ public class Drive : MonoBehaviour
     public float torque = 200f;
     public float maxSteerAngle = 30;
     public float steerSmoothSpeed = 10f;
+    public float maxBrakeTorque = 500;
 
     private float currentAccelerationInput = 0f;
     private float currentSteer = 0f;
+    private float currentBrakeTorque = 0f;
 
     void Start()
     {
@@ -19,10 +21,10 @@ public class Drive : MonoBehaviour
 
     private void FixedUpdate()
     {
-        Go(currentAccelerationInput, currentSteer);
+        Go(currentAccelerationInput, currentSteer, currentBrakeTorque);
     }
 
-    void Go(float accel, float steer)
+    void Go(float accel, float steer, float brake)
     {
         float targetSteerAngle = steer * maxSteerAngle;
 
@@ -37,14 +39,16 @@ public class Drive : MonoBehaviour
                 targetSteerAngle,
                 Time.fixedDeltaTime * steerSmoothSpeed
                 );
-
+            brake = Mathf.Clamp(brake, 0, 1) * maxBrakeTorque;
 
             WCs[i].motorTorque = thrustTorque;
 
-            if (i<2)
+            if (i < 2)
                 WCs[i].steerAngle = smoothedSteer;
+            else
+                WCs[i].brakeTorque = brake;
 
-            Quaternion quat;
+                Quaternion quat;
             Vector3 position;
 
             WCs[i].GetWorldPose(out position, out quat);
@@ -62,5 +66,10 @@ public class Drive : MonoBehaviour
     public void OnSteer(InputAction.CallbackContext context)
     {
         currentSteer = context.ReadValue<float>();
+    }
+
+    public void OnBrake(InputAction.CallbackContext context)
+    {
+        currentBrakeTorque = context.ReadValue<float>();
     }
 }
