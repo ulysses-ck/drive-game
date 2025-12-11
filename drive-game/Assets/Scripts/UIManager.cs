@@ -16,6 +16,11 @@ public class UIManager : MonoBehaviour
         Application.Quit();
     }
 
+    public void ExitMainMenu()
+    {
+        SceneManager.LoadScene(SCENE_MAIN_MENU);
+    }
+
     public void Back()
     {
         SceneManager.LoadScene(SCENE_MAIN_MENU);
