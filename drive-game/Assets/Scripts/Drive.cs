@@ -27,32 +27,37 @@ public class Drive : MonoBehaviour
     void Go(float accel, float steer, float brake)
     {
         float targetSteerAngle = steer * maxSteerAngle;
-
         accel = Mathf.Clamp(accel, -1f, 1f);
 
         float thrustTorque = accel * torque;
-        for(int i = 0; i < wheels.Length; i++)
+
+        float handBrakeTorque = Mathf.Clamp(brake, 0, 1) * maxBrakeTorque;
+
+        for (int i = 0; i < WCs.Length; i++)
         {
-            float currentSteerAngle = WCs[i].steerAngle;
-            float smoothedSteer = Mathf.Lerp(
-                currentSteerAngle,
-                targetSteerAngle,
-                Time.fixedDeltaTime * steerSmoothSpeed
-                );
-            brake = Mathf.Clamp(brake, 0, 1) * maxBrakeTorque;
-
-            WCs[i].motorTorque = thrustTorque;
-
             if (i < 2)
+            {
+                float currentSteerAngle = WCs[i].steerAngle;
+                float smoothedSteer = Mathf.Lerp(
+                    currentSteerAngle,
+                    targetSteerAngle,
+                    Time.fixedDeltaTime * steerSmoothSpeed
+                );
                 WCs[i].steerAngle = smoothedSteer;
+
+                WCs[i].motorTorque = 0;
+                WCs[i].brakeTorque = 0;
+            }
             else
-                WCs[i].brakeTorque = brake;
+            {
+                WCs[i].motorTorque = thrustTorque;
 
-                Quaternion quat;
+                WCs[i].brakeTorque = handBrakeTorque;
+            }
+
+            Quaternion quat;
             Vector3 position;
-
             WCs[i].GetWorldPose(out position, out quat);
-
             wheels[i].transform.position = position;
             wheels[i].transform.rotation = quat;
         }
